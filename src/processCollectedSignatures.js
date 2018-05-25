@@ -85,12 +85,12 @@ async function processCollSignatures(signatures, foreignChainId){
         })
         let gasEstimate;
         try {
-          gasEstimate = await foreignBridge.methods.deposit(v,r,s,message).estimateGas();
+          gasEstimate = await foreignBridge.methods.withdraw(v,r,s,message).estimateGas();
         } catch(e) {
           console.log(indexSig+1,' # already processed col sig', colSignature.transactionHash)
           return;
         }
-        const data = await foreignBridge.methods.deposit(v,r,s,message).encodeABI();
+        const data = await foreignBridge.methods.withdraw(v,r,s,message).encodeABI();
         const gasPrice = await getGasPrices();
         const txHash = await sendTx({
           rpcUrl: FOREIGN_RPC_URL,

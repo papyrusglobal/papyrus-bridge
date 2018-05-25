@@ -248,21 +248,9 @@
     "type": "function"
   },
   {
-    "payable": true,
-    "stateMutability": "payable",
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "fallback"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "gas",
-        "type": "uint256"
-      }
-    ],
-    "name": "GasConsumptionLimitsUpdated",
-    "type": "event"
   },
   {
     "anonymous": false,
@@ -278,7 +266,7 @@
         "type": "uint256"
       }
     ],
-    "name": "Deposit",
+    "name": "Withdraw",
     "type": "event"
   },
   {
@@ -300,7 +288,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "Withdraw",
+    "name": "Deposit",
     "type": "event"
   },
   {
@@ -317,7 +305,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "SignedForDeposit",
+    "name": "SignedForWithdraw",
     "type": "event"
   },
   {
@@ -334,7 +322,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "SignedForWithdraw",
+    "name": "SignedForDeposit",
     "type": "event"
   },
   {
@@ -416,6 +404,10 @@
       {
         "name": "_requiredBlockConfirmations",
         "type": "uint256"
+      },
+      {
+        "name": "_erc677token",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -425,53 +417,6 @@
         "type": "bool"
       }
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "gasLimitWithdrawRelay",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_withdraw",
-        "type": "bytes32"
-      }
-    ],
-    "name": "withdraws",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_gas",
-        "type": "uint256"
-      }
-    ],
-    "name": "setGasLimitWithdrawRelay",
-    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
@@ -492,7 +437,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "withdraw",
+    "name": "deposit",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -502,11 +447,11 @@
     "constant": true,
     "inputs": [
       {
-        "name": "_withdrawal",
+        "name": "_deposit",
         "type": "bytes32"
       }
     ],
-    "name": "numWithdrawalsSigned",
+    "name": "numDepositsSigned",
     "outputs": [
       {
         "name": "",
@@ -521,11 +466,11 @@
     "constant": true,
     "inputs": [
       {
-        "name": "_withdrawal",
+        "name": "_deposit",
         "type": "bytes32"
       }
     ],
-    "name": "withdrawalsSigned",
+    "name": "depositsSigned",
     "outputs": [
       {
         "name": "",
@@ -534,6 +479,33 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "name": "_value",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "onTokenTransfer",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -647,6 +619,20 @@
       {
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "erc677token",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,

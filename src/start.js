@@ -1,8 +1,8 @@
 require('dotenv').config();
 const {sendRawTx} = require('./tx/sendTx');
-const processDeposits = require('./processDeposits')
 const processCollectedSignatures = require('./processCollectedSignatures');
 const processWithdraw = require('./processWithdraw');
+const processTransfer = require('./processTransfers');
 
 
 async function getChainIds(){
@@ -33,12 +33,12 @@ async function main({
   homeChainId,
   foreignChainId
 }){ 
-  await processDeposits(homeChainId);
-  // setInterval(() => {processDeposits(homeChainId)}, 5000);
+  await processTransfer(homeChainId);
+  
   await processCollectedSignatures(foreignChainId)
-  // setInterval(() => {processCollectedSignatures(foreignChainId)}, 7000);
+  
   await processWithdraw(homeChainId);
-  // setInterval(() => {processWithdraw(homeChainId)}, 5000);
+  
   setTimeout(() => {
     main({
       foreignChainId,
