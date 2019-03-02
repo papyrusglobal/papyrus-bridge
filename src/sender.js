@@ -116,7 +116,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       const gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE)
 
       try {
-        logger.info(`Sending transaction with nonce ${nonce}`)
+        logger.info(`Sending transaction with nonce ${nonce} and gas price ${gasPrice.toString(10)}`)
         const txHash = await sendTx({
           chain: config.id,
           data: job.data,
@@ -129,7 +129,6 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           chainId,
           web3: web3Instance
         })
-
         nonce++
         logger.info(
           { eventTransactionHash: job.transactionReference, generatedTransactionHash: txHash },
