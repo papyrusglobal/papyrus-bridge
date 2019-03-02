@@ -1,122 +1,160 @@
-version: '2.4'
+version: '3.5'
+
 services:
+
   rabbit:
-    cpus: 0.3
-    mem_limit: 500m
-    environment: ['RABBITMQ_NODENAME=node@rabbit']
-    hostname: rabbit
     image: rabbitmq:3
+    container_name: rabbit_${COMPOSE_PROJECT_NAME:-validator}
     networks:
       - net_rabbit_bridge_request
       - net_rabbit_bridge_collected
       - net_rabbit_bridge_affirmation
       - net_rabbit_bridge_senderhome
       - net_rabbit_bridge_senderforeign
+    volumes:
+      - ~/papyrus_bridge/rabbitmq_${COMPOSE_PROJECT_NAME:-validator}:/var/lib/rabbitmq/mnesia
+    env_file: .env
+    environment: 
+      - RABBITMQ_NODENAME=node@rabbit_${COMPOSE_PROJECT_NAME:-validator}
     restart: unless-stopped
-    volumes: ['~/bridge_data/rabbitmq:/var/lib/rabbitmq/mnesia']
+
   redis:
-    cpus: 0.1
-    mem_limit: 500m
-    command: [redis-server, --appendonly, 'yes']
-    hostname: redis
     image: redis:4
-    networks:    
+    container_name: redis_${COMPOSE_PROJECT_NAME:-validator}
+    networks:
       - net_db_bridge_request
       - net_db_bridge_collected
       - net_db_bridge_affirmation
       - net_db_bridge_senderhome
       - net_db_bridge_senderforeign
+    volumes:
+      - ~/papyrus_bridge/redis_${COMPOSE_PROJECT_NAME:-validator}:/data
+    command: redis-server --appendonly 'yes'
     restart: unless-stopped
-    volumes: ['~/bridge_data/redis:/data']
+
   bridge_request:
-    cpus: 0.1
-    mem_limit: 500m
     build: .
-    command: 'true'
-    env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
-    restart: unless-stopped
-    entrypoint: npm run watcher:signature-request
+    container_name: bridge_request_${COMPOSE_PROJECT_NAME:-validator}
+    depends_on:
+      - rabbit
+      - redis
     networks:
       - net_db_bridge_request
       - net_rabbit_bridge_request
-  bridge_collected:
-    cpus: 0.1
-    mem_limit: 500m
-    build: .
-    command: 'true'
-    env_file: ./.env
+    env_file: .env
     environment: 
-      - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
+      - NODE_ENV=production
+      - QUEUE_URL=amqp://rabbit_${COMPOSE_PROJECT_NAME:-validator}
+      - REDIS_URL=redis://redis_${COMPOSE_PROJECT_NAME:-validator}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
+    entrypoint: npm run watcher:signature-request
+    command: 'true'
     restart: unless-stopped
-    entrypoint: npm run watcher:collected-signatures
+
+  bridge_collected:
+    build: .
+    container_name: bridge_collected_${COMPOSE_PROJECT_NAME:-validator}
+    depends_on:
+      - rabbit
+      - redis
     networks:
       - net_db_bridge_collected
       - net_rabbit_bridge_collected
-  bridge_affirmation:
-    cpus: 0.1
-    mem_limit: 500m
-    build: .
-    command: 'true'
-    env_file: ./.env
+    env_file: .env
     environment: 
-      - NODE_ENV=production 
+      - NODE_ENV=production
+      - QUEUE_URL=amqp://rabbit_${COMPOSE_PROJECT_NAME:-validator}
+      - REDIS_URL=redis://redis_${COMPOSE_PROJECT_NAME:-validator}
       - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
+    entrypoint: npm run watcher:collected-signatures
+    command: 'true'
     restart: unless-stopped
-    entrypoint: npm run watcher:affirmation-request
+
+  bridge_affirmation:
+    build: .
+    container_name: bridge_affirmation_${COMPOSE_PROJECT_NAME:-validator}
+    depends_on:
+      - rabbit
+      - redis
     networks:
       - net_db_bridge_affirmation
       - net_rabbit_bridge_affirmation
-  bridge_senderhome:
-    cpus: 0.1
-    mem_limit: 500m
-    build: .
-    command: 'true'
-    env_file: ./.env
+    env_file: .env
     environment: 
-      - NODE_ENV=production 
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
+      - NODE_ENV=production
+      - QUEUE_URL=amqp://rabbit_${COMPOSE_PROJECT_NAME:-validator}
+      - REDIS_URL=redis://redis_${COMPOSE_PROJECT_NAME:-validator}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
+    entrypoint: npm run watcher:affirmation-request
+    command: 'true'
     restart: unless-stopped
-    entrypoint: npm run sender:home
+
+  bridge_senderhome:
+    build: .
+    container_name: bridge_senderhome_${COMPOSE_PROJECT_NAME:-validator}
+    depends_on:
+      - rabbit
+      - redis
     networks:
       - net_db_bridge_senderhome
       - net_rabbit_bridge_senderhome
-  bridge_senderforeign:
-    cpus: 0.1
-    mem_limit: 500m
-    build: .
-    command: 'true'
-    env_file: ./.env
+    env_file: .env
     environment: 
-      - NODE_ENV=production 
+      - NODE_ENV=production
+      - QUEUE_URL=amqp://rabbit_${COMPOSE_PROJECT_NAME:-validator}
+      - REDIS_URL=redis://redis_${COMPOSE_PROJECT_NAME:-validator}
       - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
+    entrypoint: npm run sender:home
+    command: 'true'
     restart: unless-stopped
-    entrypoint: npm run sender:foreign
+
+  bridge_senderforeign:
+    build: .
+    container_name: bridge_senderforeign_${COMPOSE_PROJECT_NAME:-validator}
+    depends_on:
+      - rabbit
+      - redis
     networks:
       - net_db_bridge_senderforeign
       - net_rabbit_bridge_senderforeign
+    env_file: .env
+    environment: 
+      - NODE_ENV=production
+      - QUEUE_URL=amqp://rabbit_${COMPOSE_PROJECT_NAME:-validator}
+      - REDIS_URL=redis://redis_${COMPOSE_PROJECT_NAME:-validator}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
+    entrypoint: npm run sender:foreign
+    command: 'true'
+    restart: unless-stopped
 
 networks:
   net_db_bridge_request:
     driver: bridge
+    name: net_db_bridge_request
   net_db_bridge_collected:
     driver: bridge
+    name: net_db_bridge_collected
   net_db_bridge_affirmation:
     driver: bridge
+    name: net_db_bridge_affirmation
   net_db_bridge_senderhome:
     driver: bridge
+    name: net_db_bridge_senderhome
   net_db_bridge_senderforeign:
     driver: bridge
+    name: net_db_bridge_senderforeign
   net_rabbit_bridge_request:
     driver: bridge
+    name: net_rabbit_bridge_request
   net_rabbit_bridge_collected:
     driver: bridge
+    name: net_rabbit_bridge_collected
   net_rabbit_bridge_affirmation:
     driver: bridge
+    name: net_rabbit_bridge_affirmation
   net_rabbit_bridge_senderhome:
     driver: bridge
+    name: net_rabbit_bridge_senderhome
   net_rabbit_bridge_senderforeign:
     driver: bridge
+    name: net_rabbit_bridge_senderforeign

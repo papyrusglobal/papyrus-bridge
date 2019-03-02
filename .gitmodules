@@ -1,3 +1,4 @@
-[submodule "e2e/submodules/poa-bridge-contracts"]
-	path = submodules/poa-bridge-contracts
-	url = https://github.com/poanetwork/poa-bridge-contracts.git
+[submodule "e2e/submodules/papyrus-bridge-contracts"]
+	path = submodules/papyrus-bridge-contracts
+	url = git@github.com:papyrusglobal/papyrus-bridge-contracts.git
+	branch = papyrus

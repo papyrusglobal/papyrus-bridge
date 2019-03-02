@@ -6,17 +6,17 @@ WORKDIR /stuff
 COPY package.json .
 COPY package-lock.json .
 
-RUN git clone https://github.com/poanetwork/poa-bridge-contracts.git
+RUN git clone https://github.com/papyrusglobal/papyrus-bridge-contracts.git
 
 RUN mkdir submodules && \
-  mv poa-bridge-contracts submodules && \
-  cd submodules/poa-bridge-contracts && \
+  mv papyrus-bridge-contracts submodules && \
+  cd submodules/papyrus-bridge-contracts && \
   git fetch && \
   git checkout 2.1.0
 
 RUN npm install --unsafe-perm
 
-RUN cd submodules/poa-bridge-contracts && \
+RUN cd submodules/papyrus-bridge-contracts && \
   npm install && \
   ./node_modules/.bin/truffle compile && \
   cd deploy && \
