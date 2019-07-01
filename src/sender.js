@@ -106,7 +106,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     logger.debug('Acquiring lock')
     const lock = await redlock.lock(nonceLock, ttl)
 
-    let nonce = await readNonce()
+    let nonce = await readNonce(true)
     let insufficientFunds = false
     let minimumBalance = null
     const failedTx = []
