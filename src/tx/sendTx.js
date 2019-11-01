@@ -15,18 +15,27 @@ async function sendTx({
   chainId,
   web3
 }) {
-  const serializedTx = await web3.eth.accounts.signTransaction(
-    {
-      nonce: Number(nonce),
-      chainId,
-      to,
-      data,
-      value: Web3Utils.toWei(amount),
-      gasPrice,
-      gas: gasLimit
-    },
-    `0x${privateKey}`
-  )
+  const tx = {
+    nonce: Number(nonce),
+    chainId,
+    to,
+    data,
+    value: Web3Utils.toWei(amount),
+    gasPrice,
+    gas: gasLimit
+  }
+  const serializedTx = await web3.eth.accounts.signTransaction(tx, `0x${privateKey}`)
+
+  console.log('Sending transaction:')
+  console.log(tx)
+  console.log('Sending transaction (signed):')
+  console.log(serializedTx)
+  console.log('Sending transaction (request):')
+  console.log({
+    chain,
+    method: 'eth_sendRawTransaction',
+    params: [serializedTx.rawTransaction]
+  })
 
   return sendRawTx({
     chain,
