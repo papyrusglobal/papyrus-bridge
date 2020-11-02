@@ -87,11 +87,12 @@ async function start(chainId) {
   }
 
   fetchGasPriceInterval = setIntervalAndRun(async () => {
-    const gasPrice = await fetchGasPrice({
-      bridgeContract,
-      oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)
-    })
-    cachedGasPrice = gasPrice || cachedGasPrice
+    // const gasPrice = await fetchGasPrice({
+    //   bridgeContract,
+    //   oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)
+    // })
+    // cachedGasPrice = gasPrice || cachedGasPrice
+    logger.error('Gas price ' + cachedGasPrice + ' taken from env as a workaround.');
   }, updateInterval)
 }
 
